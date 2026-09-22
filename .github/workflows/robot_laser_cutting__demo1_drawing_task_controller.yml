@@ -1,0 +1,144 @@
+# Workflow for the images/robot_laser_cutting/demo1_drawing_task_controller image.
+#
+# Generated from .github/workflow-templates/build-and-publish.yml — see that
+# file's header if you're adding a workflow for a new project/experiment,
+# and CONTRIBUTING.md for the full checklist.
+#
+# WHY IT'S SHAPED THIS WAY
+#   - The `paths:` filters on both triggers mean this workflow only runs
+#     when files under images/robot_laser_cutting/demo1_drawing_task_controller/
+#     change, so a PR touching a different project or a different
+#     experiment within the same project never rebuilds this one.
+#   - `push: false` on pull_request builds the image to validate the
+#     Dockerfile, but never publishes it — contributors cannot push to
+#     ghcr.io/adorno-lab directly, only reviewers merging to main trigger a
+#     real publish. This also matches GITHUB_TOKEN's read-only permissions
+#     on pull_request events from forks.
+#   - Tagging follows RAICo's Docker standards: `latest` plus a
+#     DD_MM_YYYY_HH_MM_SS timestamp tag.
+#     https://github.com/Adorno-Lab/development-guidelines/tree/main/3-docker-standards
+
+name: Build and publish robot_laser_cutting/demo1_drawing_task_controller
+
+on:
+  pull_request:
+    branches: ['main']
+    paths:
+      - 'images/robot_laser_cutting/demo1_drawing_task_controller/**'
+  push:
+    branches: ['main']
+    paths:
+      - 'images/robot_laser_cutting/demo1_drawing_task_controller/**'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  REGISTRY: ghcr.io
+  # Nested path keeps the project/experiment grouping visible in GHCR.
+  # Keep the adorno-lab namespace.
+  IMAGE_NAME: adorno-lab/robot_laser_cutting/demo1_drawing_task_controller
+  BUILDX_NO_DEFAULT_ATTESTATIONS: 1 # https://github.com/orgs/community/discussions/45969
+  DOCKERFILE_CONTEXT: "images/robot_laser_cutting/demo1_drawing_task_controller"
+  DOCKERFILE_PATH: "images/robot_laser_cutting/demo1_drawing_task_controller/Dockerfile"
+  DOCKERFILE_TAG: "latest"
+  # true on push-to-main and workflow_dispatch; false on pull_request.
+  SHOULD_PUBLISH: ${{ github.event_name != 'pull_request' }}
+
+jobs:
+  compute-date:
+    runs-on: ubuntu-24.04
+    outputs:
+      date_tag: ${{ steps.date.outputs.date_tag }}
+    steps:
+      - name: Compute DD_MM_YYYY_HH_MM_SS tag (UTC, runner clock)
+        id: date
+        run: echo "date_tag=$(date +'%d_%m_%Y_%H_%M_%S')" >> "$GITHUB_OUTPUT"
+
+  build-and-push-image:
+    needs: [compute-date]
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [amd64]
+        # To also build for arm64, use the line below instead:
+        # arch: [amd64, arm64]
+    # ubuntu-24.04-arm is GitHub's hosted Arm64 runner label; nothing else
+    # here needs to change when arm64 is added to the matrix above.
+    runs-on: ${{ matrix.arch == 'amd64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
+    env:
+      DATE_TAG: ${{ needs.compute-date.outputs.date_tag }}
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to the Container registry
+        if: env.SHOULD_PUBLISH == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build (and publish on merge to main) Docker image
+        id: push_image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ env.DOCKERFILE_CONTEXT }}
+          file: ${{ env.DOCKERFILE_PATH }}
+          push: ${{ env.SHOULD_PUBLISH == 'true' }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DOCKERFILE_TAG }}_${{ matrix.arch }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DATE_TAG }}_${{ matrix.arch }}
+
+  # Based on https://github.com/juanjqo/dockerman/blob/main/.github/workflows/docker-image.yml
+  create-and-push-manifest:
+      if: needs.compute-date.outputs.date_tag != '' && github.event_name != 'pull_request'
+      runs-on: ubuntu-latest
+      permissions:
+        contents: read
+        packages: write
+        attestations: write
+        id-token: write
+      needs: [compute-date, build-and-push-image]
+      env:
+        DATE_TAG: ${{ needs.compute-date.outputs.date_tag }}
+      steps:
+        - name: Set up Docker CLI
+          uses: docker/setup-buildx-action@v3
+          with:
+            install: true
+
+        - name: Log in to the container registry
+          uses: docker/login-action@v3
+          with:
+            registry: ${{ env.REGISTRY }}
+            username: ${{ github.actor }}
+            password: ${{ secrets.GITHUB_TOKEN }}
+
+        - name: Create and push manifest for ${{ env.DOCKERFILE_TAG }}
+          run: |
+            docker manifest create ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DOCKERFILE_TAG }} \
+              --amend ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DOCKERFILE_TAG }}_amd64 #\
+              # --amend ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DOCKERFILE_TAG }}_arm64
+
+            docker manifest push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DOCKERFILE_TAG }}
+
+        - name: Create and push manifest for ${{ env.DATE_TAG }}
+          run: |
+            docker manifest create ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DATE_TAG }} \
+              --amend ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DATE_TAG }}_amd64 #\
+              # --amend ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DATE_TAG }}_arm64
+
+            docker manifest push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DATE_TAG }}
