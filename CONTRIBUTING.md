@@ -18,7 +18,11 @@ For example: `images/clerice_h1/demo1_whole_body_control`.
 
 ## Adding a new base image
 
-1. **Create the experiment directory.**
+1. **Fork this repository.**
+   You cannot create branches or push directly to this repository. You will
+   need to fork this repository before contributing to it.
+
+2. **Create the experiment directory.**
    ```
    images/<project_name>/<experiment_name>/Dockerfile
    ```
@@ -27,7 +31,7 @@ For example: `images/clerice_h1/demo1_whole_body_control`.
    a new project name if this is its first. The two directory names become
    both the GHCR image path and the workflow's path filter.
 
-2. **Add its workflow.**
+3. **Add its workflow.**
    Copy `.github/workflow-templates/build-and-publish.yml` to
    `.github/workflows/<project_name>__<experiment_name>.yml` and replace
    every `<your_project_name>` and `<your_experiment_name>` placeholder
@@ -36,7 +40,7 @@ For example: `images/clerice_h1/demo1_whole_body_control`.
    `.github/workflows/<project_name>__<experiment_name>.yml` pairs (e.g.
    `clerice_h1/demo1_whole_body_control`) is a working reference.
 
-3. **Open a pull request.**
+4. **Open a pull request.**
    - You cannot push directly to `main`; a maintainer must review and
      approve.
    - Opening the PR runs your image's workflow in *build-only* mode
@@ -47,7 +51,7 @@ For example: `images/clerice_h1/demo1_whole_body_control`.
      image builds — a PR that only touches one experiment never rebuilds
      any other experiment, in this project or any other.
 
-4. **After merge.**
+5. **After merge.**
    The same workflow re-runs on the merge commit to `main`, this time
    building *and* pushing to
    `ghcr.io/adorno-lab/<your_project_name>/<your_experiment_name>` with the
