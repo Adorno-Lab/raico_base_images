@@ -1,4 +1,4 @@
-# Workflow for the images/robot_laser_cutting/demo1_drawing_task image.
+# Workflow for the images/robot_laser_cutting/demo1_drawing_task_camera_system image.
 #
 # Generated from .github/workflow-templates/build-and-publish.yml — see that
 # file's header if you're adding a workflow for a new project/experiment,
@@ -6,7 +6,7 @@
 #
 # WHY IT'S SHAPED THIS WAY
 #   - The `paths:` filters on both triggers mean this workflow only runs
-#     when files under images/robot_laser_cutting/demo1_drawing_task/
+#     when files under images/robot_laser_cutting/demo1_drawing_task_camera_system/
 #     change, so a PR touching a different project or a different
 #     experiment within the same project never rebuilds this one.
 #   - `push: false` on pull_request builds the image to validate the
@@ -18,17 +18,17 @@
 #     DD_MM_YYYY_HH_MM_SS timestamp tag.
 #     https://github.com/Adorno-Lab/development-guidelines/tree/main/3-docker-standards
 
-name: Build and publish robot_laser_cutting/demo1_drawing_task
+name: Build and publish robot_laser_cutting/demo1_drawing_task_camera_system
 
 on:
   pull_request:
     branches: ['main']
     paths:
-      - 'images/robot_laser_cutting/demo1_drawing_task/**'
+      - 'images/robot_laser_cutting/demo1_drawing_task_camera_system/**'
   push:
     branches: ['main']
     paths:
-      - 'images/robot_laser_cutting/demo1_drawing_task/**'
+      - 'images/robot_laser_cutting/demo1_drawing_task_camera_system/**'
   workflow_dispatch:
 
 concurrency:
@@ -39,10 +39,10 @@ env:
   REGISTRY: ghcr.io
   # Nested path keeps the project/experiment grouping visible in GHCR.
   # Keep the adorno-lab namespace.
-  IMAGE_NAME: adorno-lab/robot_laser_cutting/demo1_drawing_task
+  IMAGE_NAME: adorno-lab/robot_laser_cutting/demo1_drawing_task_camera_system
   BUILDX_NO_DEFAULT_ATTESTATIONS: 1 # https://github.com/orgs/community/discussions/45969
-  DOCKERFILE_CONTEXT: "images/robot_laser_cutting/demo1_drawing_task"
-  DOCKERFILE_PATH: "images/robot_laser_cutting/demo1_drawing_task/Dockerfile"
+  DOCKERFILE_CONTEXT: "images/robot_laser_cutting/demo1_drawing_task_camera_system"
+  DOCKERFILE_PATH: "images/robot_laser_cutting/demo1_drawing_task_camera_system/Dockerfile"
   DOCKERFILE_TAG: "latest"
   # true on push-to-main and workflow_dispatch; false on pull_request.
   SHOULD_PUBLISH: ${{ github.event_name != 'pull_request' }}
