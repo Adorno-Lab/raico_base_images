@@ -69,9 +69,9 @@ RUN git clone https://github.com/patrykcieslak/stonefish_ros2.git stonefish_ros2
 
 # Create aliases
 RUN echo "source /opt/ros/jazzy/setup.bash" >> /root/.bashrc && \
-    echo "alias cdr2='cd /root/stonefish_ros2_ws'" >> /root/.bashrc && \
-    echo "alias bsr2='cdr2 && colcon build && source install/setup.bash'" >> /root/.bashrc && \
-    echo "alias cr2='cdr2 && rm -rf build install log'" >> /root/.bashrc
+    echo "alias cdr2='cd /root/stonefish_ros2_ws'" >> /root/.bashrc && \
+    echo "alias bsr2='cdr2 && colcon build && source install/setup.bash'" >> /root/.bashrc && \
+    echo "alias cr2='cdr2 && rm -rf build install log'" >> /root/.bashrc
 
 # Start in the ROS 2 workspace
 WORKDIR /root/stonefish_ros2_ws
