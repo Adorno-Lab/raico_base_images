@@ -63,11 +63,9 @@ WORKDIR /root/stonefish_ros2_ws/src
 
 
 # Clone Stonefish Ros2 with specific commit
-RUN git clone \
-        https://github.com/patrykcieslak/stonefish_ros2.git \
-        stonefish_ros2 && \
-    cd stonefish_ros2 && \
-    git checkout 6646e7ac25eed982f37f807abc7b545dbd2d6648
+RUN git clone https://github.com/patrykcieslak/stonefish_ros2.git stonefish_ros2 && \
+    cd stonefish_ros2 && \
+    git checkout 6646e7ac25eed982f37f807abc7b545dbd2d6648
 
 # Create aliases
 RUN echo "source /opt/ros/jazzy/setup.bash" >> /root/.bashrc && \
