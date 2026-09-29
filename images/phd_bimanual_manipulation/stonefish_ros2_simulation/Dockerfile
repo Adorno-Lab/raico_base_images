@@ -19,7 +19,7 @@ RUN apt-get update && \
 
 
 # Clone specific commit
-RUN git clone https://github.com/patrykcieslak/stonefish.git /root/stonefish && \
+RUN git clone git://github.com/patrykcieslak/stonefish.git /root/stonefish && \
     cd /root/stonefish && \
     git checkout b21eb8e194c570ff2f61e91aeffb38d73dc25f42
 
@@ -64,7 +64,7 @@ WORKDIR /root/stonefish_ros2_ws/src
 
 # Clone Stonefish Ros2 with specific commit
 RUN git clone \
-        https://github.com/patrykcieslak/stonefish_ros2.git \
+        git://github.com/patrykcieslak/stonefish_ros2.git \
         stonefish_ros2 && \
     cd stonefish_ros2 && \
     git checkout 6646e7ac25eed982f37f807abc7b545dbd2d6648
