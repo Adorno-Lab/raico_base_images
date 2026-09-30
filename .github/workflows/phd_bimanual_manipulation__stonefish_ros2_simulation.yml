@@ -6,7 +6,7 @@
 
 # WHY IT'S SHAPED THIS WAY
 #   - The `paths:` filters on both triggers mean this workflow only runs
-#     when files under images/<your_project_name>/<your_experiment_name>/
+#     when files under images/phd_bimanual_manipulation/stonefish_ros2_simulation/
 #     change, so a PR touching a different project or a different
 #     experiment within the same project never rebuilds this one.
 #   - `push: false` on pull_request builds the image to validate the
