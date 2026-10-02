@@ -18,13 +18,7 @@ LABEL org.opencontainers.image.licenses="LGPL-2.1-only"
 
 ########################################################################################################
 # Update SAS
-# Upgrade only the SAS packages already in murilomarinho/sas:jazzy. Installing the
-# ros-jazzy-sas-* wildcard also tries to install every other SAS package (e.g.
-# sas-robot-driver-gazebo, whose dependencies are not installable), and the
-# -dbgsym packages pin older versions of the packages they belong to.
-RUN apt-get update && \
-    apt-get purge -y 'ros-jazzy-*-dbgsym' && \
-    apt-get install --only-upgrade -y 'ros-jazzy-sas-*'
+RUN apt update && apt-get install ros-jazzy-sas-* -y
 
 
 
