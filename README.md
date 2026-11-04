@@ -22,8 +22,7 @@ Current projects and experiments:
 - `images/robot_laser_cutting/demo1_drawing_task`
 - `images/clerice_g1/demo1_manipulation`
 - `images/clerice_h1/demo1_whole_body_control`
-
-(`clerice_b1` will be added later, following the same pattern.)
+- `images/clerice_b1/sas_unitree_b1z1_jazzy`
 
 Each Dockerfile above is a placeholder (`FROM ubuntu:24.04`) — replace its
 contents with the experiment's actual base image definition. A project can
